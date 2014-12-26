@@ -1,29 +1,29 @@
 
-# NETS
+# dynamo 
 
-This is the R package `nets' (Network Estimation of Time Series) developed by Christian Brownlees (http://www.econ.upf.edu/~cbrownlees/)
+This is the R package `dynamo' (DYNAmic MOdeling) developed by Christian Brownlees (http://www.econ.upf.edu/~cbrownlees/)
 
 # Installation
 
 You can install the stable version from CRAN:
 
-http://cran.r-project.org/package=nets
+http://cran.r-project.org/package=dynamo
 
 or from the R prompt
 
-> install.packages('nets', dependencies = TRUE)
+> install.packages('dynamo', dependencies = TRUE)
 
 Alternatively, you can download the development version from github:
 
- - zip: https://github.com/ctbrownlees/R-Package-nets/zipball/master
- - tar ball: https://github.com/ctbrownlees/R-Package-nets/tarball/master
+ - zip: https://github.com/ctbrownlees/R-Package-dynamo/zipball/master
+ - tar ball: https://github.com/ctbrownlees/R-Package-dynamo/tarball/master
 
 and install it using `R CMD INSTALL`.
 
 You can also install the development version using the devtools package:
 
 > library(devtools) 
-> install_github('R-Package-nets', 'ctbrownlees')
+> install_github('R-Package-dynamo', 'ctbrownlees')
 
 Note: Windows users have to first install Rtools (http://www.murdoch-sutherland.com/Rtools/).
 
