@@ -1,0 +1,11 @@
+Package: dynamo 
+Type: Package
+Title: DYNAmic MOdels 
+Version: 0.2
+Date: 2013-03-03
+Author: Christian Brownlees
+Maintainer: Christian Brownlees <christian.brownlees@upf.edu>
+Depends: nloptr,numDeriv 
+Description: 
+License: GPL 
+LazyLoad: yes
