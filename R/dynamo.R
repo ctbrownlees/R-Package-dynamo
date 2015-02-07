@@ -30,8 +30,16 @@
 	se.coef           <- sqrt(diag(obj$vcv))
 	tval              <- obj$coef/se.coef
 	matcoef           <- cbind( obj$coef , se.coef, tval, 2*(1-pnorm(abs(tval))))
-	dimnames(matcoef) <- list( est$param.names , c(" Estimate"," Std. Error", " t value", "Pr(>|t|)"))
+	dimnames(matcoef) <- list( dimnames(est$param)[[1]] , c(" Estimate"," Std. Error", " t value", "Pr(>|t|)"))
 	obj$matcoef       <- matcoef
+  
+  # fitted values and residuals
+  obj$fit   <- est$fit
+  obj$resid <- est$resid
+  
+  for( i in 1:length(names(est$fit)) ){
+    obj[[ names(est$fit)[i] ]] <- est$fit[,i]
+  }
 
 	return(obj)
 }
@@ -42,8 +50,8 @@
 
 `print.dm` <- function (x, digits = max(3, getOption("digits") - 3), ...) {
 	cat("\nCall:\n", deparse(x$call) , sep = "")
-	cat("\n\nCoefficient(s):\n")
-	printCoefmat(x$matcoef, digits = digits, signif.stars = TRUE)
+	cat("Coefficients:\n")
+	print( round( x$coef , 3 ) )
 	invisible(x)
 }
 
@@ -51,18 +59,22 @@
 }
 
 `summary.dm` <- function( x , ... ){
-	invisible(x)
+
+  obj        <- x
+  class(obj) <- "summary.dm"
+  
+  return(obj)
 }
 
-print.summary.dm <- function( x , ... ){
+print.summary.dm <- function( x , digits = max(3, getOption("digits") - 3), ... ){
 	cat("\nCall:\n", deparse(x$call), "\n\n", sep = "")
-
-	#cat("\nCoefficient(s):\n")
-	#printCoefmat(x$matcoef, digits = 6, signif.stars = TRUE)
+	cat("\n\nCoefficients:\n")
+	printCoefmat(x$matcoef, digits = digits, signif.stars = TRUE)
+  invisible(x)
 }
 
-# Utilities
-dm.spec <- function( frml, data){
+# utilities
+dm.spec <- function( frml, data ){
 
     # variable initialization
     frml.char <- as.character(frml) 
@@ -108,6 +120,21 @@ garch.filter <- function( y , param ){
 	return(filter)
 }
 
+garch.opg <- function( y , param ){
+  
+  T      <- length(y)
+  
+  filter <- .C('garch_opg_num', 
+               status = as.integer(0), 
+               OPG     = as.double(rep(0,4*4)), 
+               as.double(param), 
+               as.double(y), 
+               as.integer(T), 
+               PACKAGE="dynamo" )
+  
+  return(OPG)
+}
+
 garch.fit <- function(y,opts){
 
 	# INPUT 
@@ -137,12 +164,17 @@ garch.fit <- function(y,opts){
 
 	filter <- garch.filter(y,param.est)
 	vcv    <- vcv.mle( param.est , obj , 0.0001 * param.est )
+  sigma2 <- data.frame( sigma2=filter$sigma2 )
+	eps    <- data.frame( eps=filter$eps )
+  
+  param.est           <- as.array(param.est)
+	dimnames(param.est) <- list( c('(Intercept)','ARCH','GARCH') )
 
-	list(   param=param.est   , param.names=c('intercept','ARCH','GARCH') , 
-		fit=filter$sigma2 , fit.names='sigma2', 
-		resid=filter$eps  , res.names='res',
+	list( param=param.est , 
+		fit=sigma2, 
+		resid=eps,
 		vcv=vcv ,
-                loglik=filter$loglik )
+    obj=filter$loglik )
 }
 
 garch.predict <- function( x ){

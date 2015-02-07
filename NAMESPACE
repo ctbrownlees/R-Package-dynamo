@@ -2,8 +2,9 @@
 useDynLib(dynamo)
 
 export(dm)
+export(summary.dm)
 
 S3method(print,dm)
+S3method(print,summary.dm)
 S3method(predict,dm)
 S3method(plot,dm)
-
