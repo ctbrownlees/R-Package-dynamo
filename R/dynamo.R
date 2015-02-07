@@ -69,7 +69,7 @@ garch.filter <- function( y , param ){
 		as.integer(T) , 
 		PACKAGE="dynamo" )
 
-        filter = list( sigma2=result$sigma2 , loglik=result$loglik )
+        filter = list( loglik=result$loglik , sigma2=result$sigma2 , eps=results$eps )
   
 	return(filter)
 }
@@ -95,11 +95,10 @@ garch.fit <- function(y,opts){
 
 		obj  <- function(x){ return( -garch.filter(y,x)$loglik ) }  
 
-		res <- lbfgs( x0=param.init, fn=obj , lower=c(0,0,0), upper=c(1,1,1) )
+		res <- nlminb( param.init, obj, lower=c(0,0,0), upper=c(1,1,1) )
+		param.est <- res$par
 
-		print( res )
-
-		param.est <- res$solution
+		print( param.est )
 	}
 	else {
 		param.est <- param.init 
