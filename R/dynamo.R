@@ -103,8 +103,8 @@ garch.filter <- function( y , param ){
 		as.integer(T), 
 		PACKAGE="dynamo" )
 
-        filter = list( loglik=filter$loglik , sigma2=filter$sigma2 , eps=filter$eps )
-  
+  filter = list( loglik=filter$loglik , sigma2=filter$sigma2 , eps=filter$eps )
+
 	return(filter)
 }
 

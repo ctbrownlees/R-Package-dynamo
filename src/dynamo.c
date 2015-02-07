@@ -25,7 +25,7 @@ void garch_filter(int *status, double *sigma2, double* eps, double *loglik, doub
 		sigma2[0] += y[t]*y[t];
 	}
 	sigma2[0] /= 10;
-  	eps[0] = y[0]/sqrt( sigma2[0] );
+  eps[0] = y[0]/sqrt( sigma2[0] );
   
 	// loop 
 	*loglik = 0;
