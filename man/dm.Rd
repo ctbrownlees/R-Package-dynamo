@@ -8,7 +8,6 @@
 \arguments{
 	\item{formula}{formula}
 	\item{data}{data}
-	\item{param}{param}
 	\item{opts}{opts}
 }
 \details{The dm procedure can be used to fit dynamic models.}
