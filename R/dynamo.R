@@ -75,29 +75,43 @@ garch.filter <- function( y , param ){
 }
 
 garch.fit <- function(y,opts){
-  
-  obj  <- function(x){ return( -garch.filter(y,x)$loglik ) }  
-  der  <- function(x){ return( nl.grad(x,obj) ) }
-  
-  # initial values
-  x0 <- c( var(y)*(0.05) , 0.05 , 0.90 )
-  
-  if( is.null(opts$fit) | opts$fit==FALSE )
-  {
-	  opts <- list("algorithm"="NLOPT_LD_LBFGS",
-        	       "xtol_rel"=1.0e-8)
-  
-	  res <- nloptr( x0=x0, 
-                 eval_f     =obj,
-                 eval_grad_f=der, 
-                 opts=opts)
-  }
-  
-  print( res )
 
-  #C <- solve( hessian( obj , res$solution ) )
-  
-  list( param=res$solution , param.names <-c('intercept','ARCH','GARCH') , vcv=C)
+	# INPUT 
+	if( is.null(opts$param) ){  
+		param.init <- c( var(y)*(0.05) , 0.05 , 0.90 ) 
+	}
+	else {
+		param.init <- opts$param.init 
+	}
+	if( is.null(opts$fit) ){ 
+		fit <- TRUE
+	}
+	else { 
+		fit <- as.logical( opts$fit ) 
+	}
+
+	# MAIN
+	if( fit==TRUE ){ 
+
+		obj  <- function(x){ return( -garch.filter(y,x)$loglik ) }  
+
+		res <- lbfgs( x0=param.init, fn=obj , lower=c(0,0,0), upper=c(1,1,1) )
+
+		print( res )
+
+		param.est <- res$solution
+	}
+	else {
+		param.est <- param.init 
+	}
+
+	filter <- garch.filter(y,param.est)
+
+	#C <- solve( hessian( obj , res$solution ) )
+
+	list( param=param.est , param.names=c('intercept','ARCH','GARCH') , 
+		fitted=filter$sigma2 , fitted.names='sigma2', 
+		residuals=1 )
 }
 
 tarch.filter <- function( y , param ){

@@ -15,7 +15,7 @@ void garch_filter(int *status, double *sigma2, double* eps, double *loglik, doub
 	beta  = param[2];
   
 	if( alpha <= 0 || beta < 0 || omega<0 || (alpha+beta)>1 ){
-		*loglik = -10000000;
+		*loglik = -100000;
 		return;
 	}
 
@@ -83,6 +83,7 @@ void tarch_filter(int *status, double *sigma2, double* eps, double *loglik, doub
 }
 
 // MEWMA Model Filter
+/*
 void mewma_filter(int *status, double *Sigma, double* eps, double *loglik, double *param, double *y, int *T, int *N){
 
 	double logden;
@@ -120,3 +121,4 @@ void mewma_filter(int *status, double *Sigma, double* eps, double *loglik, doubl
 	Free(E);
 }
 
+*/
