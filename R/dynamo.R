@@ -1,8 +1,7 @@
 
 .packageName <- "dynamo"
 
-.First.lib <- function(lib, pkg)
-{
+.First.lib <- function(lib, pkg){
      library.dynam("dynamo", pkg, lib)
 }
 
@@ -96,12 +95,12 @@ garch.filter <- function( y , param ){
 
 	filter <- .C('garch_filter', 
 		status = as.integer(0), 
-		sigma2 = as.double(rep(0,T)) , 
-		eps    = as.double(rep(0,T)) , 
-		loglik = as.double(0) , 
-		as.double(param) , 
-		as.double(y) , 
-		as.integer(T) , 
+		sigma2 = as.double(rep(0,T)), 
+		eps    = as.double(rep(0,T)), 
+		loglik = as.double(0), 
+		as.double(param), 
+		as.double(y), 
+		as.integer(T), 
 		PACKAGE="dynamo" )
 
         filter = list( loglik=filter$loglik , sigma2=filter$sigma2 , eps=filter$eps )
@@ -152,44 +151,29 @@ garch.predict <- function( x ){
 
 # Gaussian TARCH(1,1) functions
 tarch.filter <- function( y , param ){
-  
-  T      <- length(y)
-  
-  result <- .C( 'tarch_filter', 
-                status = as.integer(0), 
-                sigma2 = as.double(rep(0,T)) , 
-                eps    = as.double(rep(0,T)) , 
-                loglik = as.double(0) , 
-                as.double(param) , 
-                as.double(y) , 
-                as.integer(T) , 
-                PACKAGE="dynamo" )
-  
-  filter = list( sigma2=result$sigma2 , loglik=result$loglik )
-  
-  return(filter)
+
+	T      <- length(y)
+
+	result <- .C( 'tarch_filter', 
+        	status = as.integer(0), 
+	        sigma2 = as.double(rep(0,T)) , 
+        	eps    = as.double(rep(0,T)) , 
+	        loglik = as.double(0) , 
+        	as.double(param) , 
+	        as.double(y) , 
+        	as.integer(T) , 
+	        PACKAGE="dynamo" )
+
+	filter = list( sigma2=result$sigma2 , loglik=result$loglik )
+
+	return(filter)
 }
 
 tarch.fit <- function(y){
   
-  obj  <- function(x){ return( -tarch.filter(y,x)$loglik ) }  
-  der  <- function(x){ return( nl.grad(x,obj) ) }
-  
-  # initial values
-  x0 <- c( var(y)*(0.05) , 0.05 , 0.0 , 0.90 )
-  
-  opts <- list("algorithm"="NLOPT_LD_LBFGS",
-               "xtol_rel"=1.0e-8)
-  
-  #
-  res <- nloptr( x0=x0, 
-                 eval_f     =obj,
-                 eval_grad_f=der, 
-                 opts=opts)
-  
-  print( res )
-  
-  list( param=res$solution )
+	obj  <- function(x){ return( -tarch.filter(y,x)$loglik ) }  
+	
+	list( a=0 )
 }
 
 # Multivariate EWMA
