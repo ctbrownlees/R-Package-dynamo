@@ -29,5 +29,7 @@ ret <- diff( log( sp500$price ) )*100
 
 garch11 <- dm( ret ~ garch )
 
+garch11
+
 }
 \keyword{timeseries}

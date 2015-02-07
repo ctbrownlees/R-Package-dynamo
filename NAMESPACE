@@ -4,4 +4,6 @@ useDynLib(dynamo)
 export(dm)
 
 S3method(print,dm)
+S3method(predict,dm)
 S3method(plot,dm)
+
