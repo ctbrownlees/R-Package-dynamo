@@ -49,9 +49,9 @@
 }
 
 `print.dm` <- function (x, digits = max(3, getOption("digits") - 3), ...) {
-	cat("\nCall:\n", deparse(x$call) , sep = "")
-	cat("Coefficients:\n")
-	print( round( x$coef , 3 ) )
+  cat("\nCall:\n", deparse(x$call), "\n", sep = "")
+  cat("\nCoefficients:\n")
+  print( round( x$coef , 3 ) )
 	invisible(x)
 }
 
@@ -67,8 +67,8 @@
 }
 
 print.summary.dm <- function( x , digits = max(3, getOption("digits") - 3), ... ){
-	cat("\nCall:\n", deparse(x$call), "\n\n", sep = "")
-	cat("\n\nCoefficients:\n")
+	cat("\nCall:\n", deparse(x$call), "\n", sep = "")
+	cat("\nCoefficients:\n")
 	printCoefmat(x$matcoef, digits = digits, signif.stars = TRUE)
   invisible(x)
 }
