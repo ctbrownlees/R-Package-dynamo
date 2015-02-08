@@ -45,7 +45,7 @@
 }
 
 `predict.dm` <- function(x) {
-
+ 
 }
 
 `print.dm` <- function (x, digits = max(3, getOption("digits") - 3), ...) {
@@ -56,6 +56,11 @@
 }
 
 `plot.dm` <- function( x , ... ){
+  switch( x$model ,
+          garch=arch.plot(x),
+          tarch=arch.plot(x)
+  )
+  invisible(x) 
 }
 
 `summary.dm` <- function( x , ... ){
@@ -177,8 +182,19 @@ garch.fit <- function(y,opts){
     obj=filter$loglik )
 }
 
-garch.predict <- function( x ){
+garch.predict <- function( x , n.ahead=NULL, y.out=NULL ){
 
+  # STATIC FORECAST
+  y      <- c( x$y , y.out , 0 )
+  filter <- garch.filter( y , x$coef )
+  pred   <- filter$sigma2
+
+  list( pred=pred )
+}
+
+arch.plot <- function( x ){
+  plot( sqrt(x$sigma2) , t='l' , col='red2' , lwd=2 , tck=0.02 , xaxs='i' , xlab='time' , ylab='conditional volatility' ) 
+  grid()
 }
 
 # Gaussian TARCH(1,1) functions
