@@ -21,11 +21,9 @@ void garch_filter(int *status, double *sigma2, double* eps, double *loglik, doub
 
 	// init
 	sigma2[0]=0;
-	for( t=0; t<10; ++t ){
-		sigma2[0] += y[t]*y[t];
-	}
+	for( t=0; t<10; ++t ){ sigma2[0] += y[t]*y[t]; }
 	sigma2[0] /= 10;
-  eps[0] = y[0]/sqrt( sigma2[0] );
+	eps[0] = y[0]/sqrt( sigma2[0] );
   
 	// loop 
 	*loglik = 0;
@@ -93,13 +91,13 @@ void garch_hessian_num(int *status, double *OPG, double *param, double *y, int *
 // TARCH(1,1) Model Filter
 void tarch_filter(int *status, double *sigma2, double* eps, double *loglik, double *param, double *y, int *T){
 
-  double logden;
+	double logden;
 	double omega, alpha, gamma, beta;
 	int t;
 
 	omega = param[0];
 	alpha = param[1];
-  gamma = param[2];
+	gamma = param[2];
 	beta  = param[3];
 
 	// check constraints
@@ -110,11 +108,9 @@ void tarch_filter(int *status, double *sigma2, double* eps, double *loglik, doub
 
 	// init
 	sigma2[0]=0;
-	for( t=0; t<10; ++t ){
-		sigma2[0] += y[t]*y[t];
-	}
+	for( t=0; t<10; ++t ){ sigma2[0] += y[t]*y[t]; }
 	sigma2[0] /= 10;
-  eps[0] = y[0]/sqrt( sigma2[0] );
+	eps[0] = y[0]/sqrt( sigma2[0] );
   
 	// loop 
 	*loglik = 0;
