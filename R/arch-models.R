@@ -19,20 +19,20 @@ garch.filter <- function( y , param ){
   return(filter)
 }
 
-garch.opg <- function( y , param ){
-  
-  T      <- length(y)
-  
-  filter <- .C('garch_opg_num', 
-               status = as.integer(0), 
-               OPG     = as.double(rep(0,4*4)), 
-               as.double(param), 
-               as.double(y), 
-               as.integer(T), 
-               PACKAGE="dynamo" )
-  
-  return(OPG)
-}
+# garch.opg <- function( y , param ){
+#   
+#   T      <- length(y)
+#   
+#   filter <- .C('garch_opg_num', 
+#                status = as.integer(0), 
+#                OPG     = as.double(rep(0,4*4)), 
+#                as.double(param), 
+#                as.double(y), 
+#                as.integer(T), 
+#                PACKAGE="dynamo" )
+#   
+#   return(OPG)
+# }
 
 garch.fit <- function(y,opts){
   
@@ -78,12 +78,18 @@ garch.fit <- function(y,opts){
 
 garch.predict <- function( x , n.ahead=NULL, y.out=NULL ){
   
-  # STATIC FORECAST
-  if( !is.null(y.out) ){
-    type   <- 'static'
+  if( !is.null(n.ahead) ){ type <- 'dynamic' }
+  if( !is.null(y.out)   ){ type <- 'static' }
+  
+  if( type=='static' ){
     y      <- c( x$y , y.out , 0 )
     filter <- garch.filter( y , x$coef )
     pred   <- filter$sigma2[length(x$y):length(y)]
+  }
+  if( type=='dynamic' ){
+    #y      <- c( x$y ,  )
+    #filter <- garch.filter( y , x$coef )
+    #pred   <- filter$sigma2[length(x$y):length(y)]
   }
   
   list( type=type , pred=pred )
@@ -91,16 +97,21 @@ garch.predict <- function( x , n.ahead=NULL, y.out=NULL ){
 
 arch.plot <- function( x , type ){
   
-  if( is.null(type) ){
+  if( is.null(type) ){ type <- 'vol' }
+  
+  if( type=='vol' ){
+
     plot( sqrt(x$sigma2) , t='l' , col='red2' , lwd=2 , tck=0.02 , xaxs='i' , xlab='time' , ylab='conditional volatility' ) 
     grid()
+
     return()
-  }  
-  if( type=='b' ){
+  } else if( type=='series' ){
+
     plot( x$y , t='p' , col='orange2' , lwd=2 , tck=0.02 , xaxs='i' , xlab='time' , ylab='') 
     lines( 2*sqrt(x$sigma2) , col='red2') 
     lines( -2*sqrt(x$sigma2) , col='red2' ) 
     grid()
+
     return()
   }
   

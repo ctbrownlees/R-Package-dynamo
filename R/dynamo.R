@@ -51,10 +51,10 @@
   pred <- switch( x$model ,
           garch=garch.predict(x,n.ahead,y.out)
   )
-  
+
   obj        <- x 
-  obj$type   <- 'static'
-  obj$y.out  <- y.out
+  #obj$type   <- 'static'
+  #obj$y.out  <- y.out
   obj$pred   <- pred$pred
   class(obj) <- "predict.dm"
   
@@ -120,3 +120,8 @@ vcv.mle <- function( x , obj , epsilon ){
 	}
 	vcv <- solve(Hessian)
 }
+
+# TESTS
+archlm.test <- function(){ }
+
+dm.test <- function(){ }
