@@ -23,7 +23,7 @@ bidcc.fit <- function(y,opts){
   
   # INPUT 
   if( is.null(opts$param) ){  
-    param.init <- c( 0.05 , 0.90 ) 
+    param.init <- c( 0.025 , 0.950 ) 
   }
   else {
     param.init <- opts$param.init 

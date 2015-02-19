@@ -153,7 +153,7 @@ void tarch_filter(int *status, double *sigma2, double* eps, double *loglik, doub
 	}
 }
 
-// BIDCC Model Filter
+// Bivariate DCC(1,1) Model Filter
 void bidcc_filter(int *status, double *rho, double* eps, double *loglik, double *param, double *_y, int *T){
 
   int t;
@@ -206,4 +206,8 @@ void bidcc_filter(int *status, double *rho, double* eps, double *loglik, double 
   // cleanup
   destroy_real_matrix(Q,*T,3);
   destroy_real_matrix(y,*T,2);
+}
+
+// Bivariate Scalar BEKK(1,1) Model Filter
+void bisbekk_filter(int *status, double *rho, double* eps, double *loglik, double *param, double *_y, int *T){
 }
