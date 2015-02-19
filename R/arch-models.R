@@ -9,10 +9,10 @@ garch.filter <- function( y , param ){
                sigma2 = as.double(rep(0,T)), 
                eps    = as.double(rep(0,T)), 
                loglik = as.double(0), 
-               as.double(param), 
-               as.double(y), 
-               as.integer(T), 
-               PACKAGE="dynamo" )
+               as.double(param),
+               as.double(y),
+               as.integer(T),
+               PACKAGE="dynamo")
   
   filter = list( loglik=filter$loglik , sigma2=filter$sigma2 , eps=filter$eps )
   
@@ -54,7 +54,7 @@ garch.fit <- function(y,opts){
   obj  <- function(x){ return( -garch.filter(y,x)$loglik ) }  
   
   if( fit==TRUE ){ 
-    res <- nlminb( param.init, obj, lower=c(0,0,0), upper=c(1,1,1) )
+    res <- nlminb( param.init, obj, lower=c(0,1e-5,0), upper=c(1,1,1) )
     param.est <- res$par
   }
   else {

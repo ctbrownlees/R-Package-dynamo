@@ -15,7 +15,7 @@
 	est <- switch( job$mdl ,
 	  garch=garch.fit(job$y,opts),
 	  tarch=tarch.fit(job$y,opts),
-	  mewma=mewma.fit(job$y,opts)
+    bidcc=bidcc.fit(job$y,opts)
 	)
 
 	obj <- list( call=call )

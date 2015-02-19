@@ -1,48 +1,65 @@
-# Multivariate EWMA
-mewma.filter <- function( y , param ){
+
+# Bivariate DCC
+bidcc.filter <- function(y,param){
   
   T      <- nrow(y)
-  N      <- ncol(y)
   
-  result <- .C( 'mewma_filter', 
+  result <- .C( 'bidcc_filter', 
                 status = as.integer(0), 
-                Sigma  = as.double(rep(0,T*N)) , 
-                eps    = as.double(rep(0,T*N)) , 
-                loglik = as.double(0) , 
-                as.double(param) , 
-                as.double(y) , 
-                as.integer(T) , 
-                as.integer(N) , 
-                PACKAGE="dynamo" )
-  
-  filter = list( sigma2=result$sigma2 , loglik=result$loglik )
+                rho    = as.double(rep(0,T)), 
+                eps    = as.double(rep(0,T*2)),
+                loglik = as.double(0),
+                as.double(param),
+                as.double(y),
+                as.integer(T), 
+                PACKAGE="dynamo")
+
+  filter = list( rho=result$rho , loglik=result$loglik )
   
   return(filter)
 }
 
-mewma.fit <- function(y,param,fit){
+bidcc.fit <- function(y,opts){
   
-  obj  <- function(x){ return( -mewma.filter(y,x)$loglik ) }  
-  der  <- function(x){ return( nl.grad(x,obj) ) }
-  
-  # initial values
-  if( fit==TRUE ){
-    x0 <- c( var(y)*(0.05) , 0.05 , 0.90 )
-    
-    opts <- list("algorithm"="NLOPT_LD_LBFGS","xtol_rel"=1.0e-8)
-    
-    res <- nloptr( x0=x0, 
-                   eval_f     =obj,
-                   eval_grad_f=der, 
-                   opts=opts)
-    
-    print( res )
+  # INPUT 
+  if( is.null(opts$param) ){  
+    param.init <- c( 0.05 , 0.90 ) 
   }
   else {
-    out <- mewma.filter(y,param)
-  }  
+    param.init <- opts$param.init 
+  }
+  if( is.null(opts$fit) ){ 
+    fit <- TRUE
+  }
+  else { 
+    fit <- as.logical( opts$fit ) 
+  }
   
-  #C <- solve( hessian( obj , res$solution ) )
+  # MAIN
+  obj  <- function(x){ return( -bidcc.filter(y,x)$loglik ) }  
   
-  list( param=res$solution , param.names <-c('intercept','ARCH','GARCH') , vcv=C)
+  if( fit==TRUE ){ 
+    res <- nlminb( param.init, obj, lower=c(1e-5,0), upper=c(1,1) )
+    param.est <- res$par
+  }
+  else {
+    param.est <- param.init 
+  }
+  
+  filter <- bidcc.filter(y,param.est)
+  vcv    <- vcv.mle( param.est , obj , 0.0001 * param.est )
+  #vcv    <- matrix(c(1,0,0,1),2,2)
+  rho    <- data.frame( rho=filter$rho )
+  eps    <- data.frame( eps=filter$eps )
+  
+  param.est           <- as.array(param.est)
+  dimnames(param.est) <- list( c('alpha','beta') )
+  
+  print( param.est) 
+  
+  list( param=param.est , 
+        fit=rho, 
+        resid=eps,
+        vcv=vcv ,
+        obj=filter$loglik )
 }

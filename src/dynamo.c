@@ -2,6 +2,30 @@
 #include <R.h>
 #include <math.h>
 
+// utilities
+double **create_real_matrix(int rows, int cols){
+  int i;
+  double **mat = (double **) Calloc(rows,double*);
+  for(i = 0; i < rows; i++) mat[i] = (double *) Calloc(cols,double);
+  return mat;
+}
+
+double **create_and_copy_real_matrix(int rows, int cols, double *data){
+  int i,j;
+  double **mat = (double **) Calloc(rows,double*);
+  for(i = 0; i < rows; i++){
+    mat[i] = (double *) Calloc(cols,double);
+    for(j=0;j<cols;++j) mat[i][j] = data[j * rows + i];
+  }
+  return mat;
+}
+
+void destroy_real_matrix(double **matrix, int rows, int cols){
+  int i;
+  for(i = 0; i < rows; i++){ Free(matrix[i]); }
+	Free(matrix);
+}
+
 // Gaussian GARCH(1,1) Filter
 void garch_filter(int *status, double *sigma2, double* eps, double *loglik, double *param, double *y, int *T){
 
@@ -14,7 +38,7 @@ void garch_filter(int *status, double *sigma2, double* eps, double *loglik, doub
 	beta  = param[2];
 
 	// check constraints
-	if( alpha <= 0 || beta < 0 || omega<0 || (alpha+beta)>1 ){
+	if( alpha <= 1e-6 || beta < 0 || omega<=0 || (alpha+beta)>1 ){
 		*loglik = -HUGE_VAL;
 		return;
 	}
@@ -34,6 +58,12 @@ void garch_filter(int *status, double *sigma2, double* eps, double *loglik, doub
 		logden    = -0.5 *log(2*PI) -0.5*log( sigma2[t] ) -0.5*(y[t]*y[t])/sigma2[t];
 		*loglik   += logden;
 	}
+  
+  // safeguard
+  if( !isfinite(*loglik) ){
+    *loglik = -HUGE_VAL;
+  }
+
 }
 
 // Gaussian GARCH(1,1) numerical OPG
@@ -123,43 +153,57 @@ void tarch_filter(int *status, double *sigma2, double* eps, double *loglik, doub
 	}
 }
 
-// MEWMA Model Filter
-/*
-void mewma_filter(int *status, double *Sigma, double* eps, double *loglik, double *param, double *y, int *T, int *N){
+// BIDCC Model Filter
+void bidcc_filter(int *status, double *rho, double* eps, double *loglik, double *param, double *_y, int *T){
 
+  int t;
 	double logden;
-	double lambda;
-	int t,i,j;
-	double ***S, **E, **Y;
- 
-  	*loglik = 0;
-
-	S = Calloc(T,double**);
-	for( t=0; t<T; t++) { 
-		S[t] = Calloc(N,double *); 
-		for( i=0; i<N; ++i ) {
-			S[t][i] = Calloc(N,double); 
-			for( i=0; i<N; ++i ){
-				S[t][i][i] = 0;
-			}
-		}
+	double alpha,beta;
+	double **Q, **y;
+  double rho_bar;
+  *loglik = 0;
+  
+  alpha = param[0];
+	beta  = param[1];
+  
+  // check constraints
+	if( alpha <= 1e-5 || beta < 0 || (alpha+beta)>1 ){
+		*loglik = -HUGE_VAL;
+		return;
 	}
 
-	Y = Calloc(T,double*);
-	E = Calloc(T,double*);
-	for( i=0; i<T; i++) { 
-		Y[i] = Calloc(N,double); 
-		E[i] = Calloc(N,double); 
-		for( j=0; j<N; j++ ) {
-			Y[i][j] = y[ M * j + i ];
-			E[i][j] = 0;
-		}
-	}
-
-	// clean up	
-	for(t = 0; t < T; t++){ Free(Y[i]); Free(E[i])}
-	Free(Y);
-	Free(E);
+  // allocate
+  Q = create_real_matrix(*T,3);
+  y = create_and_copy_real_matrix(*T,2,_y);
+    
+  // init
+  rho_bar = 0;
+	for( t=0; t<*T; ++t ){ rho_bar += y[t][0]*y[t][1]; }
+	rho_bar /= *T;
+  
+  Q[0][0] = 1;
+  Q[0][1] = 1;
+  Q[0][2] = rho_bar;
+  rho[0]  = rho_bar;
+  
+  // loop
+  *loglik = 0;
+  for( t=1; t<*T; ++t ){
+    Q[t][0] = (1-alpha-beta)         + alpha*y[t-1][0]*y[t-1][0] + beta*Q[t-1][0];
+    Q[t][1] = (1-alpha-beta)         + alpha*y[t-1][1]*y[t-1][1] + beta*Q[t-1][1];
+    Q[t][2] = rho_bar*(1-alpha-beta) + alpha*y[t-1][0]*y[t-1][1] + beta*Q[t-1][2];    
+    rho[t]  = Q[t][2]/sqrt(Q[t][0]*Q[t][1]);
+    
+    logden  = -0.5*log(2*PI) - 0.5*log(1-rho[t]*rho[t]) - 0.5*(y[t][0]*y[t][0]+y[t][1]*y[t][1]-2*y[t][0]*y[t][1]*rho[t])/ (1.0-rho[t]*rho[t]);
+  	*loglik += logden;    
+  }
+  
+  // safeguard
+  if( !isfinite(*loglik) ){
+    *loglik = -HUGE_VAL;
+  }
+  
+  // cleanup
+  destroy_real_matrix(Q,*T,3);
+  destroy_real_matrix(y,*T,2);
 }
-
-*/
