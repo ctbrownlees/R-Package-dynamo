@@ -15,7 +15,8 @@
 	est <- switch( job$mdl ,
 	  garch=garch.fit(job$y,opts),
 	  tarch=tarch.fit(job$y,opts),
-    bidcc=bidcc.fit(job$y,opts)
+    bidcc=bidcc.fit(job$y,opts),
+    mewma=mewma.fit(job$y,opts)
 	)
 
 	obj <- list( call=call )
@@ -24,7 +25,7 @@
 	# model info
 	obj$model  <- job$mdl
 
-	# coef
+	# coef  
 	obj$coef          <- est$param
 	obj$vcv           <- est$vcv
 	se.coef           <- sqrt(diag(obj$vcv))
@@ -36,11 +37,13 @@
   
   # fitted values and residuals
   obj$y     <- job$y
+  obj$T     <- nrow(as.matrix(job$y))
+	obj$N     <- ncol(as.matrix(job$y))
   obj$fit   <- est$fit
   obj$resid <- est$resid
   
   for( i in 1:length(names(est$fit)) ){
-    obj[[ names(est$fit)[i] ]] <- est$fit[,i]
+    obj[[ names(est$fit)[i] ]] <- est$fit[[ names(est$fit)[i] ]]
   }
 
 	return(obj)
