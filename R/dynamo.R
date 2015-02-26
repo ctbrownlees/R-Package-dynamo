@@ -121,7 +121,15 @@ vcv.mle <- function( x , obj , epsilon ){
 			Hessian[i, j] = (obj(x1)-obj(x2)-obj(x3)+obj(x4))/ (4*epsilon[i]*epsilon[j])
 		}
 	}
-	vcv <- solve(Hessian)
+  
+  if( all(is.finite(Hessian)) ) {
+    if( all( eigen(Hessian)$values > 0 ) ){
+      vcv <- solve(Hessian)
+      return( vcv )
+    }
+  }
+  
+  vcv <- diag( length(epsilon) )
 }
 
 # TESTS

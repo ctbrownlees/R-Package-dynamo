@@ -105,7 +105,7 @@ mewma.fit <- function(y,opts){
   obj  <- function(x){ return( -mewma.filter(y,x)$loglik ) }  
   
   if( fit==TRUE ){ 
-    res <- nlminb( param.init, obj, lower=c(1e-5), upper=c(1) )
+    res <- nlminb( param.init, obj, lower=c(1e-5), upper=c(1-1e-5) )
     param.est <- res$par
   }
   else {

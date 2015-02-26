@@ -45,7 +45,6 @@ void destroy_real_matrix(double **matrix, int rows, int cols){
 double **create_real_array3d(int d1, int d2, int d3){
   int i,j;
   double ***array = (double **) Calloc(d1,double**);
-
   for (i=0; i < d1; ++i){ 
     array[i] = Calloc(d2,double*); 
     for(j=0; j<d2;++j){
@@ -55,7 +54,7 @@ double **create_real_array3d(int d1, int d2, int d3){
   return array;
 }
 
-void real_array_3d_copy(double ***array, int d1, int d2, int d3, double *data){
+void real_array3d_copy(double ***array, int d1, int d2, int d3, double *data){
    int i, j, k;
    for( i=0; i<d1; ++i)
     for( j=0; j<d2; ++j)
@@ -367,7 +366,7 @@ void mewma_filter(int *status, double *_s, double* _eps, double *loglik, double 
   }
   
   // copy results
-  real_array_3d_copy(S,*T,*N,*N,_s);
+  real_array3d_copy(S,*T,*N,*N,_s);
   real_matrix_copy(eps,*T,*N,_eps);
   
   // cleanup
