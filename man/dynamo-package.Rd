@@ -2,7 +2,7 @@
 \alias{dynamo-package}
 \docType{package}
 \title{DYNAmic MOdelling}
-\description{The dynamo package provides routines for the analysis of time series data.}
+\description{The dynamo package provides routines for the analysis of time series data, with a special focus on the nonlinear time series models used in Economics and Finance.}
 \details{
 \tabular{ll}{
 Package: \tab dynamo\cr

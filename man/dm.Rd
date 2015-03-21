@@ -1,13 +1,11 @@
 \name{dm}
 \alias{dm}
-\alias{print.dm}
-\alias{plot.dm}
-\title{Dynamic Modeling}
-\description{dm}
-\usage{ dm( formula , data = parent.frame(), param = NULL, opts = NULL) }
+\title{ Fitting dynamic models }
+\description{ dm is used to fit dynamic models.}
+\usage{ dm( formula , data = parent.frame() , opts = NULL) }
 \arguments{
-	\item{formula}{formula}
-	\item{data}{data}
+	\item{formula}{an object of class "formula" (or one that can be coerced to that class): a symbolic description of the model to be fitted. The details of model specification are given under ‘Details’.}
+	\item{data}{an optional data frame, list or environment (or object coercible by as.data.frame to a data frame) containing the variables in the model. If not found in data, the variables are taken from environment(formula), typically the environment from which lm is called}
 	\item{opts}{opts}
 }
 \details{The dm procedure can be used to fit dynamic models.}
