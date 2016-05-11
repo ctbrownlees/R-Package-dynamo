@@ -62,7 +62,7 @@ garch.fit <- function(y,opts){
   }
   
   filter <- garch.filter(y,param.est)
-  vcv    <- vcv.mle( param.est , obj , 0.0001 * param.est )
+  vcv    <- vcv.mle( param.est , obj , 0.0001 * abs(param.est) )
   sigma2 <- data.frame( sigma2=filter$sigma2 )
   eps    <- data.frame( eps=filter$eps )
   

@@ -1,4 +1,5 @@
 \name{sp500}
+\alias{sp500}
 \docType{data}
 \title{Lengths of Major North American Rivers}
 \description{

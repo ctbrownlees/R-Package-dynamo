@@ -3,6 +3,7 @@ useDynLib(dynamo)
 
 export(dm)
 export(summary.dm)
+export(predict.dm)
 
 S3method(print,dm)
 S3method(print,summary.dm)
