@@ -262,6 +262,12 @@ void bidcc_filter(int *status, double *rho, double* eps, double *loglik, double 
   double **Q, **y;
   double rho_bar;
   *loglik = 0;
+
+  // sanity check
+  if( !finite(param[0]) || !finite(param[1]) ){
+	*loglik = -HUGE_VAL;
+	return;
+  }
   
   alpha = param[0];
   beta  = param[1];
@@ -296,13 +302,11 @@ void bidcc_filter(int *status, double *rho, double* eps, double *loglik, double 
     
     logden  = -0.5*log(2*PI) - 0.5*log(1-rho[t]*rho[t]) - 0.5*(y[t][0]*y[t][0]+y[t][1]*y[t][1]-2*y[t][0]*y[t][1]*rho[t])/ (1.0-rho[t]*rho[t]);
 
-    Rprintf("%f, ",rho[t]);
-
-    if( !finite(logden) ){
+    if( finite(logden) ){
     	*loglik += logden;    
     }
     else{
-	Rprintf("problem at time %d",t);
+	Rprintf("problem at time %d\n",t);
     }
 
   }

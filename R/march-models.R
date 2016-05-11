@@ -4,6 +4,11 @@ bidcc.filter <- function(y,param){
   
   T      <- nrow(y)
   
+  if( any(!is.finite(param)) ){ 
+    filter = list( rho=rep(0,T) , loglik=-Inf )    
+    return( filter ) 
+  }
+  
   result <- .C( 'bidcc_filter', 
                 status = as.integer(0), 
                 rho    = as.double(rep(0,T)), 
