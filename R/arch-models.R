@@ -1,8 +1,13 @@
 
 # Gaussian GARCH(1,1) functions
 garch.filter <- function( y , param ){
-  
+
   T      <- length(y)
+  
+  if( any(!is.finite(param)) ){ 
+    filter = list( loglik=-Inf , sigma2=rep(NA,T) , eps=rep(NA,T) )    
+    return( filter ) 
+  }
   
   filter <- .C('garch_filter', 
                status = as.integer(0), 
@@ -121,6 +126,11 @@ arch.plot <- function( x , type ){
 tarch.filter <- function( y , param ){
   
   T      <- length(y)
+
+  if( any(!is.finite(param)) ){ 
+    filter = list( loglik=-Inf , sigma2=rep(NA,T) )    
+    return( filter ) 
+  }  
   
   result <- .C( 'tarch_filter', 
                 status = as.integer(0), 
@@ -132,7 +142,7 @@ tarch.filter <- function( y , param ){
                 as.integer(T) , 
                 PACKAGE="dynamo" )
   
-  filter = list( sigma2=result$sigma2 , loglik=result$loglik )
+  filter = list( loglik=result$loglik , sigma2=result$sigma2 )
   
   return(filter)
 }
