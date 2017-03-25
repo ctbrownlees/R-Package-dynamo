@@ -30,16 +30,16 @@ double **create_and_copy_real_matrix(int rows, int cols, double *data){
 }
 
 void real_matrix_copy(double **mat, int d1, int d2, double *data){
-   int i, j;
-   for( i=0; i<d1; ++i)
+  int i, j;
+  for( i=0; i<d1; ++i)
     for( j=0; j<d2; ++j)
-        data[i+d1*j] = mat[i][j];
+      data[i+d1*j] = mat[i][j];
 }
 
 void destroy_real_matrix(double **matrix, int rows, int cols){
   int i;
   for(i = 0; i < rows; i++){ Free(matrix[i]); }
-	Free(matrix);
+  Free(matrix);
 }
 
 double **create_real_array3d(int d1, int d2, int d3){
@@ -55,8 +55,8 @@ double **create_real_array3d(int d1, int d2, int d3){
 }
 
 void real_array3d_copy(double ***array, int d1, int d2, int d3, double *data){
-   int i, j, k;
-   for( i=0; i<d1; ++i)
+  int i, j, k;
+  for( i=0; i<d1; ++i)
     for( j=0; j<d2; ++j)
       for( k=0; k<d3; ++k )
         data[i+d1*j+d1*d2*k] = array[i][j][k];
@@ -72,15 +72,15 @@ void destroy_real_array3d(double ***array, int d1, int d2, int d3){
 }
 
 void chol(double **L, double **M, int n) {
-    int i, j, k;
-    double s;
-    for(i = 0; i < n; i++) {
-        for(j = 0; j < (i+1); j++) {
-            s = 0;
-            for( k = 0; k < j; k++) s += L[i][k] * L[j][k];
-            L[i][j] = (i == j) ? sqrt(M[i][i] - s) : (1.0 / L[j][j] * (M[i][j] - s));
-        }
+  int i, j, k;
+  double s;
+  for(i = 0; i < n; i++) {
+    for(j = 0; j < (i+1); j++) {
+      s = 0;
+      for( k = 0; k < j; k++) s += L[i][k] * L[j][k];
+      L[i][j] = (i == j) ? sqrt(M[i][i] - s) : (1.0 / L[j][j] * (M[i][j] - s));
     }
+  }
 }
 
 //
@@ -88,10 +88,10 @@ void chol(double **L, double **M, int n) {
 void chol_up(double **L_new, double **L_old, double *x, int n, double a, double b, double *work) {
   int i,j;
   double r, c, s;
-  
+
   memcpy(work,x,sizeof(double)*n);
   for(i=0;i<n;++i) work[i] = sqrt(b)*work[i]; // this could be avoided maybe?
-  
+
   for(i=0;i<n;++i){
     r = sqrt(a*L_old[i][i]*L_old[i][i] + work[i]*work[i]);
     c = r /( sqrt(a)*L_old[i][i] );
@@ -129,36 +129,36 @@ void matvec(double *y, double **A, double *x, int n){
 // Gaussian GARCH(1,1) Filter
 void garch_filter(int *status, double *sigma2, double* eps, double *loglik, double *param, double *y, int *T){
 
-	double logden;
-	double omega, alpha, beta;
-	int t;
+  double logden;
+  double omega, alpha, beta;
+  int t;
 
-	omega = param[0];
-	alpha = param[1];
-	beta  = param[2];
+  omega = param[0];
+  alpha = param[1];
+  beta  = param[2];
 
-	// check constraints
-	if( alpha <= 1e-6 || beta < 0 || omega<=0 || (alpha+beta)>1 ){
-		*loglik = -HUGE_VAL;
-		return;
-	}
+  // check constraints
+  if( alpha <= 1e-6 || beta < 0 || omega<=0 || (alpha+beta)>1 ){
+    *loglik = -HUGE_VAL;
+    return;
+  }
 
-	// init
-	sigma2[0]=0;
-	for( t=0; t<10; ++t ){ sigma2[0] += y[t]*y[t]; }
-	sigma2[0] /= 10;
-	eps[0] = y[0]/sqrt( sigma2[0] );
-	*loglik = 0;
-  
-	// loop
-	for( t=1 ; t<*T ; ++t ){
-		sigma2[t] = omega + alpha * y[t-1]*y[t-1] + beta * sigma2[t-1];	
-		eps[t]    = y[t]/sqrt( sigma2[t] );
+  // init
+  sigma2[0]=0;
+  for( t=0; t<10; ++t ){ sigma2[0] += y[t]*y[t]; }
+  sigma2[0] /= 10;
+  eps[0] = y[0]/sqrt( sigma2[0] );
+  *loglik = 0;
 
-		logden    = -0.5 *log(2*PI) -0.5*log( sigma2[t] ) -0.5*(y[t]*y[t])/sigma2[t];
-		*loglik   += logden;
-	}
-  
+  // loop
+  for( t=1 ; t<*T ; ++t ){
+    sigma2[t] = omega + alpha * y[t-1]*y[t-1] + beta * sigma2[t-1];	
+    eps[t]    = y[t]/sqrt( sigma2[t] );
+
+    logden    = -0.5 *log(2*PI) -0.5*log( sigma2[t] ) -0.5*(y[t]*y[t])/sigma2[t];
+    *loglik   += logden;
+  }
+
   // safeguard
   if( !isfinite(*loglik) ){
     *loglik = -HUGE_VAL;
@@ -172,43 +172,43 @@ void garch_opg_num(int *status, double *OPG, double *param, double *y, int *T, d
   double logden_plus, logden_minus;
   double param_plus[4], param_minus[4];
   double dlogden[4];
-	double omega, alpha, beta;
-	int t,i,j,p;
+  double omega, alpha, beta;
+  int t,i,j,p;
 
   /*
   // init
-	sigma2[0]=0;
-	for( t=0; t<10; ++t ){
-		sigma2[0] += y[t]*y[t];
-	}
-	sigma2[0] /= 10;
-  
-	// loop 
-	for( t=1; t<*T; ++t ){
-    for( p=0; p<4; ++p ){
-      
-      memcpy(param_plus ,param,4*sizeof(double));
-      param_minus[p] += eps[p];
-      omega = param_plus[0]; alpha = param_plus[1]; beta  = param_plus[2];    
-		  sigma2[t] = omega + alpha * y[t-1]*y[t-1] + beta * sigma2[t-1];	
-		  logden_plus = -0.5 *log(2*PI) -0.5*log( sigma2[t] ) -0.5*(y[t]*y[t])/sigma2[t];
+  sigma2[0]=0;
+  for( t=0; t<10; ++t ){
+  sigma2[0] += y[t]*y[t];
+  }
+  sigma2[0] /= 10;
 
-      memcpy(param_minus,param,4*sizeof(double));
-      param_plus[p] += eps[p];
-      omega = param_minus[0]; alpha = param_minus[1]; beta  = param_minus[2];    
-  	  sigma2[t] = omega + alpha * y[t-1]*y[t-1] + beta * sigma2[t-1];	
-		  logden_minus = -0.5 *log(2*PI) -0.5*log( sigma2[t] ) -0.5*(y[t]*y[t])/sigma2[t];
-	
-      dlogden[p] = (logden_plus-logden_minus)/(2*eps[p]);
+  // loop 
+  for( t=1; t<*T; ++t ){
+  for( p=0; p<4; ++p ){
 
-    }
-    
-    for( i=0; i<4; ++i ){
-      for( j=0; j<=i; ++j){
-        dlogden[i]*dlogden[j];
-      {
-    }
-	}
+  memcpy(param_plus ,param,4*sizeof(double));
+  param_minus[p] += eps[p];
+  omega = param_plus[0]; alpha = param_plus[1]; beta  = param_plus[2];    
+  sigma2[t] = omega + alpha * y[t-1]*y[t-1] + beta * sigma2[t-1];	
+  logden_plus = -0.5 *log(2*PI) -0.5*log( sigma2[t] ) -0.5*(y[t]*y[t])/sigma2[t];
+
+  memcpy(param_minus,param,4*sizeof(double));
+  param_plus[p] += eps[p];
+  omega = param_minus[0]; alpha = param_minus[1]; beta  = param_minus[2];    
+  sigma2[t] = omega + alpha * y[t-1]*y[t-1] + beta * sigma2[t-1];	
+  logden_minus = -0.5 *log(2*PI) -0.5*log( sigma2[t] ) -0.5*(y[t]*y[t])/sigma2[t];
+
+  dlogden[p] = (logden_plus-logden_minus)/(2*eps[p]);
+
+  }
+
+  for( i=0; i<4; ++i ){
+  for( j=0; j<=i; ++j){
+  dlogden[i]*dlogden[j];
+  {
+  }
+  }
   */
 
 }
@@ -221,36 +221,36 @@ void garch_hessian_num(int *status, double *OPG, double *param, double *y, int *
 // TARCH(1,1) Model Filter
 void tarch_filter(int *status, double *sigma2, double* eps, double *loglik, double *param, double *y, int *T){
 
-	double logden;
-	double omega, alpha, gamma, beta;
-	int t;
+  double logden;
+  double omega, alpha, gamma, beta;
+  int t;
 
-	omega = param[0];
-	alpha = param[1];
-	gamma = param[2];
-	beta  = param[3];
+  omega = param[0];
+  alpha = param[1];
+  gamma = param[2];
+  beta  = param[3];
 
-	// check constraints
-	if( alpha <= 0 || beta < 0 || omega<0 || (alpha+beta)>1 ){
-		*loglik = -HUGE_VAL;
-		return;
-	}
+  // check constraints
+  if( alpha <= 0 || beta < 0 || omega<0 || (alpha+beta)>1 ){
+    *loglik = -HUGE_VAL;
+    return;
+  }
 
-	// init
-	sigma2[0]=0;
-	for( t=0; t<10; ++t ){ sigma2[0] += y[t]*y[t]; }
-	sigma2[0] /= 10;
-	eps[0] = y[0]/sqrt( sigma2[0] );
-  
-	// loop 
-	*loglik = 0;
-	for( t=1 ; t<*T ; ++t ){
-		sigma2[t] = omega + alpha * y[t-1]*y[t-1] + gamma * y[t-1]*y[t-1]*((double)(y[t-1]<0)) + beta * sigma2[t-1];  
-		eps[t]    = y[t]/sqrt( sigma2[t] );
+  // init
+  sigma2[0]=0;
+  for( t=0; t<10; ++t ){ sigma2[0] += y[t]*y[t]; }
+  sigma2[0] /= 10;
+  eps[0] = y[0]/sqrt( sigma2[0] );
 
-		logden    = -0.5 *log(2*PI) -0.5*log(sigma2[t]) -0.5*(y[t]*y[t])/sigma2[t];
-		*loglik   += logden;
-	}
+  // loop 
+  *loglik = 0;
+  for( t=1 ; t<*T ; ++t ){
+    sigma2[t] = omega + alpha * y[t-1]*y[t-1] + gamma * y[t-1]*y[t-1]*((double)(y[t-1]<0)) + beta * sigma2[t-1];  
+    eps[t]    = y[t]/sqrt( sigma2[t] );
+
+    logden    = -0.5 *log(2*PI) -0.5*log(sigma2[t]) -0.5*(y[t]*y[t])/sigma2[t];
+    *loglik   += logden;
+  }
 }
 
 // Bivariate DCC(1,1) Model Filter
@@ -265,33 +265,33 @@ void bidcc_filter(int *status, double *rho, double* eps, double *loglik, double 
 
   // sanity check
   if( !finite(param[0]) || !finite(param[1]) ){
-	*loglik = -HUGE_VAL;
-	return;
+    *loglik = -HUGE_VAL;
+    return;
   }
-  
+
   alpha = param[0];
   beta  = param[1];
-  
+
   // check constraints
   if( alpha <= 1e-5 || beta < 0 || (alpha+beta)>1 ){
-	*loglik = -HUGE_VAL;
-	return;
+    *loglik = -HUGE_VAL;
+    return;
   }
 
   // allocate
   Q = create_real_matrix(*T,3);
   y = create_and_copy_real_matrix(*T,2,_y);
-    
+
   // init
   rho_bar = 0;
   for( t=0; t<*T; ++t ){ rho_bar += y[t][0]*y[t][1]; }
   rho_bar /= *T;
-  
+
   Q[0][0] = 1;
   Q[0][1] = 1;
   Q[0][2] = rho_bar;
   rho[0]  = rho_bar;
-  
+
   // loop
   *loglik = 0;
   for( t=1; t<*T; ++t ){
@@ -299,23 +299,23 @@ void bidcc_filter(int *status, double *rho, double* eps, double *loglik, double 
     Q[t][1] = (1-alpha-beta)         + alpha*y[t-1][1]*y[t-1][1] + beta*Q[t-1][1];
     Q[t][2] = rho_bar*(1-alpha-beta) + alpha*y[t-1][0]*y[t-1][1] + beta*Q[t-1][2];    
     rho[t]  = Q[t][2]/sqrt(Q[t][0]*Q[t][1]);
-    
+
     logden  = -0.5*log(2*PI) - 0.5*log(1-rho[t]*rho[t]) - 0.5*(y[t][0]*y[t][0]+y[t][1]*y[t][1]-2*y[t][0]*y[t][1]*rho[t])/ (1.0-rho[t]*rho[t]);
 
     if( finite(logden) ){
-    	*loglik += logden;    
+      *loglik += logden;    
     }
     else{
-	Rprintf("problem at time %d\n",t);
+      Rprintf("problem at time %d\n",t);
     }
 
   }
-  
+
   // safeguard
   if( !isfinite(*loglik) ){
     *loglik = -HUGE_VAL;
   }
-  
+
   // cleanup
   destroy_real_matrix(Q,*T,3);
   destroy_real_matrix(y,*T,2);
@@ -326,20 +326,20 @@ void mewma_filter(int *status, double *_s, double* _eps, double *loglik, double 
 
   int t,i,j;
   double logden;
-	double lambda;
-	double ***S, **y, **eps;
+  double lambda;
+  double ***S, **y, **eps;
   double **Sig;
   double *work1, **work2;
   double rho_bar;
   *loglik = 0;
-  
+
   lambda = param[0];
-  
+
   // check constraints
-	if( lambda <= 1e-5 || lambda>1 ){
-		*loglik = -HUGE_VAL;
-		return;
-	}
+  if( lambda <= 1e-5 || lambda>1 ){
+    *loglik = -HUGE_VAL;
+    return;
+  }
 
   // allocate
   S     = create_real_array3d(*T,*N,*N);
@@ -351,9 +351,9 @@ void mewma_filter(int *status, double *_s, double* _eps, double *loglik, double 
   // init
   for( i=0; i<*N; ++i){
     for( j=0; j<=i; ++j ){
-	    work2[i][j]=0;
+      work2[i][j]=0;
       for( t=0; t<*T; ++t ){ work2[i][j] += y[t][i]*y[t][j]; }
-	    work2[i][j] /= *T;
+      work2[i][j] /= *T;
       work2[j][i] = work2[i][j];
     }
   }
@@ -366,22 +366,22 @@ void mewma_filter(int *status, double *_s, double* _eps, double *loglik, double 
     chol_up(S[t],S[t-1],y[t-1],*N,lambda,1.0-lambda,work1);    
     fwdinv(work2,S[t],*N);
     matvec(eps[t],work2,y[t],*N);
-    
+
     logden = -0.5*(*N)*log(2*PI);
     for(i=0;i<*N;++i) logden += -log( S[t][i][i] )-0.5*eps[t][i]*eps[t][i];
-    
+
     *loglik += logden;
   }
-  
+
   // safeguard
   if( !isfinite(*loglik) ){
     *loglik = -HUGE_VAL;
   }
-  
+
   // copy results
   real_array3d_copy(S,*T,*N,*N,_s);
   real_matrix_copy(eps,*T,*N,_eps);
-  
+
   // cleanup
   destroy_real_array3d(S,*T,*N,*N);
   destroy_real_matrix(y,*T,*N);
