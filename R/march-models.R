@@ -88,6 +88,7 @@ bekk.fit <- function(y,opts){
   
   if( fit==TRUE ){ 
     res <- optim( par=param.init, obj, method="L-BFGS-B", lower=0, upper=1 )
+    # res <- nlminb( param.init, obj, lower=0, upper=1 )
     param.est <- res$par
   } else {
     param.est <- param.init 
@@ -157,6 +158,7 @@ mewma.fit <- function(y,opts){
   
   if( fit==TRUE ){ 
     res <- optim( par=param.init, obj, method="Brent", lower=0, upper=1 )
+    # res <- nlminb( param.init, obj, lower=0, upper=1 )
     param.est <- res$par
   }
   else {

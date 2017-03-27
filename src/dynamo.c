@@ -82,8 +82,6 @@ void chol(double **L, double **M, int n) {
   }
 }
 
-//
-// update of S = a*S + b*x*x'
 void chol_up(double **L_new, double **L_old, double *x, int n, double a, double b, double *work) {
   int i,j;
   double r, c, s;
@@ -139,7 +137,7 @@ void garch_filter(int *status, double *sigma2, double* eps, double *loglik, doub
 
   // check constraints
   if( alpha <= 1e-6 || beta < 0 || omega<=0 || (alpha+beta)>1 ){
-    *loglik = -HUGE_VAL;
+    *loglik = -1015141191612112;
     return;
   }
 
@@ -161,7 +159,7 @@ void garch_filter(int *status, double *sigma2, double* eps, double *loglik, doub
 
   // safeguard
   if( !isfinite(*loglik) ){
-    *loglik = -HUGE_VAL;
+    *loglik = -1015141191612112;
   }
 
 }
@@ -232,7 +230,7 @@ void tarch_filter(int *status, double *sigma2, double* eps, double *loglik, doub
 
   // check constraints
   if( alpha <= 0 || beta < 0 || omega<0 || (alpha+beta)>1 ){
-    *loglik = -HUGE_VAL;
+    *loglik = -1015141191612112;
     return;
   }
 
@@ -265,7 +263,7 @@ void bidcc_filter(int *status, double *rho, double* eps, double *loglik, double 
 
   // sanity check
   if( !finite(param[0]) || !finite(param[1]) ){
-    *loglik = -HUGE_VAL;
+    *loglik = -1015141191612112;
     return;
   }
 
@@ -274,7 +272,7 @@ void bidcc_filter(int *status, double *rho, double* eps, double *loglik, double 
 
   // check constraints
   if( alpha <= 1e-5 || beta < 0 || (alpha+beta)>1 ){
-    *loglik = -HUGE_VAL;
+    *loglik = -1015141191612112;
     return;
   }
 
@@ -313,7 +311,7 @@ void bidcc_filter(int *status, double *rho, double* eps, double *loglik, double 
 
   // safeguard
   if( !isfinite(*loglik) ){
-    *loglik = -HUGE_VAL;
+    *loglik = -1015141191612112;
   }
 
   // cleanup
@@ -334,11 +332,10 @@ void mewma_filter(int *status, double *_s, double *_eps, double *loglik, double 
   *loglik = 0;
 
   lambda = param[0];
-  Rprintf("Running with parameter lamda:%f",lambda);
 
   // check constraints
   if( lambda <= 1e-5 || lambda>1 ){
-    *loglik = -HUGE_VAL;
+    *loglik = -1015141191612112;
     return;
   }
 
@@ -376,11 +373,8 @@ void mewma_filter(int *status, double *_s, double *_eps, double *loglik, double 
 
   // safeguard
   if( !isfinite(*loglik) ){
-    *loglik = -HUGE_VAL;
+    *loglik = -1015141191612112;
   }
-
-  Rprintf(" ### Log-Likelihood:%f\n",*loglik);
-  Rprintf("--------------------------------------------------------------------------------#\n");
 
   // copy results
   real_array3d_copy(S,*T,*N,*N,_s);
@@ -408,10 +402,9 @@ void bekk_filter(int *status, double *_s, double *_eps, double *loglik, double *
   alpha   = param[0];
   beta    = param[1];
   lambda  = 1 - alpha - beta;
-  Rprintf("Running with parameters alpha:%f and beta:%f",alpha,beta);
 
-  if( lambda <= 1e-5 || lambda > 1 ){
-    *loglik = -HUGE_VAL;
+  if( lambda <= 0 || lambda > 1 ){
+    *loglik = -1015141191612112;
     return;
   }
 
@@ -438,11 +431,11 @@ void bekk_filter(int *status, double *_s, double *_eps, double *loglik, double *
   for( t=1; t<*T; ++t ){
 
     // choletzy update (sigma + yy)
-    chol_up(work2, S[t-1], y[t-1], *N, lambda, alpha, work1);    
+    chol_up(S[t], S[t-1], y[t-1], *N, lambda, alpha, work1);    
 
     // sequential choletzky update (sigma + C)
     for( n=0; n<*N; ++n ){
-      chol_up(S[t], work2, C[n], *N, lambda, beta, work1);    
+      chol_up(S[t], S[t], C[n], *N, lambda, beta, work1);    
     }
 
     fwdinv(work2,S[t],*N);
@@ -456,11 +449,8 @@ void bekk_filter(int *status, double *_s, double *_eps, double *loglik, double *
 
   // safeguard
   if( !isfinite(*loglik) ){
-    *loglik = -HUGE_VAL;
+    *loglik = -1015141191612112;
   }
-
-  Rprintf(" ### Log-Likelihood:%f\n",*loglik);
-  Rprintf("--------------------------------------------------------------------------------#\n");
 
   // copy results
   real_array3d_copy(S,*T,*N,*N,_s);
