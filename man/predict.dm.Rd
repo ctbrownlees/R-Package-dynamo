@@ -15,7 +15,5 @@
 \author{Christian Brownlees}
 \examples{
 
-garch11
-
 }
 \keyword{timeseries}

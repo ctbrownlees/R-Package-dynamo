@@ -76,7 +76,7 @@ mewma.filter <- function(y,param){
   
   result <- .C( 'mewma_filter', 
                 status = as.integer(0), 
-                S    = as.double(rep(0,T*N*N)), 
+                S      = as.double(rep(0,T*N*N)), 
                 eps    = as.double(rep(0,T*N)),
                 loglik = as.double(0),
                 as.double(param),
@@ -131,9 +131,9 @@ mewma.fit <- function(y,opts){
   param.est           <- as.array(param.est)
   dimnames(param.est) <- list( c('lambda') )
 
-  list( param=param.est , 
+  list( param=param.est, 
         fit=Sig, 
         resid=eps,
-        vcv=vcv ,
+        vcv=vcv,
         obj=filter$loglik )
 }

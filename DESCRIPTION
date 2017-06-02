@@ -5,7 +5,7 @@ Version: 0.3-1
 Date: 2014-12-01
 Author: Christian Brownlees
 Maintainer: Christian Brownlees <christian.brownlees@upf.edu>
-Description: DynaMo (Dynamic Models) is a package for time series analysis with a special focus on the time series models used in Financial Econometrics. The package provides methods for simulation, inference and prediction of a set dynamic models including: GARCH, ACD and GAS. 
+Description: DynaMo (Dynamic Models) is a package for time series analysis. The package provides methods for simulation, inference and prediction of a set dynamic models including: GARCH, ACD and GAS. 
 License: GPL
 URL: https://github.com/ctbrownlees/R-Package-dynamo
 LazyLoad: yes

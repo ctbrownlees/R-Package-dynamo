@@ -24,21 +24,6 @@ garch.filter <- function( y , param ){
   return(filter)
 }
 
-# garch.opg <- function( y , param ){
-#   
-#   T      <- length(y)
-#   
-#   filter <- .C('garch_opg_num', 
-#                status = as.integer(0), 
-#                OPG     = as.double(rep(0,4*4)), 
-#                as.double(param), 
-#                as.double(y), 
-#                as.integer(T), 
-#                PACKAGE="dynamo" )
-#   
-#   return(OPG)
-# }
-
 garch.fit <- function(y,opts){
   
   # INPUT 
@@ -152,4 +137,94 @@ tarch.fit <- function(y){
   obj  <- function(x){ return( -tarch.filter(y,x)$loglik ) }  
   
   list( a=0 )
+}
+
+# Gaussian APARCH filter
+aparch.filter <- function( x , params ){
+  
+  T   <- length(x)
+  
+  if( any(!is.finite(params)) ){ 
+    filter = list( loglik=-Inf , sigma2=rep(NA,T) )    
+    return( filter ) 
+  }  
+  
+  result <- .C( 'aparch_filter', 
+                status = as.integer(0), 
+                sigma2 = as.double(rep(0,T)) , 
+                eps    = as.double(rep(0,T)) , 
+                loglik = as.double(0) , 
+                as.double(params) , 
+                as.double(x) , 
+                as.integer(T)
+                )
+  
+  return(list( loglik=result$loglik , sigma2=result$sigma2 ))
+}
+
+aparch.fit <- function(x){
+  
+  # Initialise parameters and set bounds
+  Tx <<- x
+  Meanx = mean(Tx); Varx = var(Tx); S = 1e-3
+  
+  params_init = c(mu = Meanx, omega = 0.1*Varx, alpha = 0.1, gam1= 0.02, beta = 0.81,delta=2)
+  lowerBounds = c(mu = -10*abs(Meanx), omega = S, alpha = S, gam1= -(1-S), beta = S,delta=0.1)
+  upperBounds = c(mu = 10*abs(Meanx), omega = 10*Varx, alpha = 1-S, gam1 = (1-S), beta = 1-S,delta=4)
+  
+  # Optimise -log-likelihood and calculate Hessian matrix
+  
+  fit = nlminb(start = params_init, objective = llh,
+               lower = lowerBounds, upper = upperBounds) # , control = list(trace=3))
+
+  hess <- Hessian(fit$par) 
+  
+  cat("Log likelihood at MLEs: ","\n")
+  print(-llh(fit$par))
+  
+  # Step 6: Create and Print Summary Report:
+  se.coef = sqrt(abs(diag(solve(hess))))
+  tval = fit$par/se.coef
+  matcoef = cbind(fit$par, se.coef, tval, 2*(1-pnorm(abs(tval))))
+  dimnames(matcoef) = list(names(tval), c(" Estimate", " Std. Error", " t value", "Pr(>|t|)"))
+  cat("\nCoefficient(s):\n")
+  printCoefmat(matcoef, digits = 6, signif.stars = TRUE)
+  
+  # compute output
+  est=fit$par
+  mu = est[1]; omega = est[2]; alpha = est[3]; gam1=est[4]; beta = est[5]; delta = est[6]
+  z= Tx-mu
+  sigma.t = aparch.filter(x,est)$sigma2
+  
+  return(list(summary = matcoef, residuals = z, volatility = sigma.t, par=est, n.loglik = -fit$obj))
+
+}
+
+# Gaussian sv(1) functions
+sv.filter <- function( y , u , z , param ){
+  
+  T      <- length(y)
+  P      <- ncol(u)
+  
+  if( any(!is.finite(param)) ){ 
+    filter = list( loglik=-Inf , sigma2=rep(NA,T) , eps=rep(NA,T) )    
+    return( filter ) 
+  }
+  
+  filter <- .C('sv_filter', 
+               status    = as.integer(0), 
+               sigma2.pr = as.double(rep(0,T*P)), 
+               sigma2.up = as.double(rep(0,T*P)), 
+               loglik    = as.double(0), 
+               as.double(param),
+               as.double(y),
+               as.double(z),
+               as.double(u),
+               as.integer(T),
+               as.integer(P),
+               PACKAGE="dynamo")
+  
+  filter = list( loglik=filter$loglik , sigma2=filter$sigma2 , eps=filter$eps )
+  
+  return(filter)
 }
