@@ -96,7 +96,7 @@ mewma.fit <- function(y,opts){
   if( is.null(opts$param) ){  
     param.init <- c( 0.94 ) 
   }
-  else {se {
+  else {
     param.est <- param.init 
   }
   
