@@ -96,7 +96,21 @@ mewma.fit <- function(y,opts){
   if( is.null(opts$param) ){  
     param.init <- c( 0.94 ) 
   }
-  else {
+  else {se {
+    param.est <- param.init 
+  }
+  
+  filter <- bidcc.filter(y,param.est)
+  vcv    <- vcv.mle( param.est , obj , 0.0001 * param.est )
+  rho    <- data.frame( rho=filter$rho )
+  eps    <- data.frame( eps=filter$eps )
+  
+  param.est           <- as.array(param.est)
+  dimnames(param.est) <- list( c('alpha','beta') )
+  
+  print( param.est) 
+  
+
     param.init <- opts$param.init 
   }
   if( is.null(opts$fit) ){ 

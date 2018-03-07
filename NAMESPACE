@@ -6,6 +6,7 @@ export(summary.dm)
 export(predict.dm)
 
 export(sv.filter)
+export(ll.filter)
 
 S3method(print,dm)
 S3method(print,summary.dm)

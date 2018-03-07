@@ -9,15 +9,15 @@ garch.filter <- function( y , param ){
     return( filter ) 
   }
   
-  filter <- .C('garch_filter', 
-               status = as.integer(0), 
-               sigma2 = as.double(rep(0,T)), 
-               eps    = as.double(rep(0,T)), 
-               loglik = as.double(0), 
-               as.double(param),
-               as.double(y),
-               as.integer(T),
-               PACKAGE="dynamo")
+ filter <- .C('garch_filter', 
+              status = as.integer(0), 
+              sigma2 = as.double(rep(0,T)), 
+              eps    = as.double(rep(0,T)), 
+              loglik = as.double(0), 
+              as.double(param),
+              as.double(y),
+              as.integer(T),
+              PACKAGE="dynamo")
   
   filter = list( loglik=filter$loglik , sigma2=filter$sigma2 , eps=filter$eps )
   
@@ -201,13 +201,13 @@ aparch.fit <- function(x){
 }
 
 # Gaussian sv(1) functions
-sv.filter <- function( y , u , z , param ){
+sv.filter <- function( y , z , u , param ){
   
   T      <- length(y)
   P      <- ncol(u)
   
   if( any(!is.finite(param)) ){ 
-    filter = list( loglik=-Inf , sigma2=rep(NA,T) , eps=rep(NA,T) )    
+    filter <- list( loglik=-Inf , sigma2=rep(NA,T) , eps=rep(NA,T) )    
     return( filter ) 
   }
   
@@ -224,7 +224,45 @@ sv.filter <- function( y , u , z , param ){
                as.integer(P),
                PACKAGE="dynamo")
   
-  filter = list( loglik=filter$loglik , sigma2=filter$sigma2 , eps=filter$eps )
+  filter <- list( loglik=filter$loglik )
   
   return(filter)
+}
+
+# local level functions
+ll.filter <- function( y , z , u , param ){
+  
+  T      <- length(y)
+  P      <- ncol(u)
+  
+  if( any(!is.finite(param)) ){ 
+    filter <- list( loglik=-Inf )    
+    return( filter ) 
+  }
+  
+  # call filter
+  filter <- .C('ll_filter', 
+               status    = as.integer(0), 
+               x.pr      = as.double(rep(0,T*P)), 
+               x.up      = as.double(rep(0,T*P)), 
+               meas      = as.double(rep(0,T*P)), 
+               tran      = as.double(rep(0,T*P)), 
+               loglik    = as.double(0), 
+               as.double(param),
+               as.double(y),
+               as.double(z),
+               as.double(u),
+               as.integer(T),
+               as.integer(P),
+               PACKAGE="dynamo")
+  
+  # pack everything up
+  x.pr <- matrix(filter$x.pr,T,P)
+  x.up <- matrix(filter$x.up,T,P)
+  meas <- matrix(filter$meas,T,P)
+  tran <- matrix(filter$tran,T,P)  
+  filter <- list( loglik=filter$loglik , x.pr=x.pr , x.up=x.up , meas=meas , tran=tran )
+  
+  return(filter)
+
 }
