@@ -109,14 +109,11 @@ mewma.fit <- function(y,opts){
   dimnames(param.est) <- list( c('alpha','beta') )
   
   print( param.est) 
-  
+  param.init <- opts$param.init 
 
-    param.init <- opts$param.init 
-  }
   if( is.null(opts$fit) ){ 
     fit <- TRUE
-  }
-  else { 
+  } else { 
     fit <- as.logical( opts$fit ) 
   }
   
